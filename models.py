@@ -11,7 +11,15 @@ metadata = MetaData(naming_convention={
 
 db = SQLAlchemy(metadata=metadata)
 
-
+#User Model
+class User(db.Model):
+    __tablename__ = 'users'
+    
+    id = id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, nullable=False, unique=True)
+    
+    reviews = db.relationship('Review', back_populates="user", cascade='all, delete-orphan')
+    
 # Item Model
 item_special_categories = db.Table(
         'item_special_categories',
@@ -33,6 +41,8 @@ class Item(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=func.now())
     modified_at = db.Column(db.DateTime, default=func.now(), default=func.now())
     
+    reviews = db.relationship('Review', back_populates="item", cascade='all, delete-orphan')
+    
     # Many-to-many relationship with SpecialCategory
     special_categories = db.relationship(
         'SpecialCategory',
@@ -43,6 +53,7 @@ class Item(db.Model, SerializerMixin):
     # Check if the item is in stock
     def is_in_stock(self):
         return self.items_in_stock > 0
+    
 
 # SpecialCategory Model
 class SpecialCategory(db.Model, SerializerMixin):
@@ -50,3 +61,17 @@ class SpecialCategory(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
+    
+    
+class Review(db.Model):
+    __tablename__ = "reviews"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer)
+    review_message = db.Column(db.String)
+    created_at = db.Column(db.DateTime, default=func.now())
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    
+    item = db.relationship('Item', back_populates="reviews")
+    user = db.relationship('User', back_populates="reviews")

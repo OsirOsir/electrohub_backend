@@ -1,4 +1,4 @@
-from models import db, Item, SpecialCategory
+from models import db, Item, SpecialCategory, Review
 from app import app
 from datetime import datetime
 
@@ -194,7 +194,19 @@ with app.app_context():
     
     print("Special categories items added successfully!")
     
-
+    db.session.commit()
+    
+    
+    print("Seeding item reviews...")
+    reviews = [
+        Review(id = 1, rating = 1, review_message = "", item_id = 1, user_id = 1)
+    ]
+    
+    
+    db.session.add_all(reviews)
+    
+    print("Items reviews seeded successfully!")
+    
     # Commit to save the items
     db.session.commit()
 
