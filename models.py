@@ -39,7 +39,7 @@ class Item(db.Model, SerializerMixin):
     item_category = db.Column(db.String, nullable=False)
     items_in_stock = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=func.now())
-    modified_at = db.Column(db.DateTime, default=func.now(), default=func.now())
+    modified_at = db.Column(db.DateTime, onupdate=func.now())
     
     reviews = db.relationship('Review', back_populates="item", cascade='all, delete-orphan')
     

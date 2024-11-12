@@ -6,7 +6,7 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://groupthree:phase5group3@localhost/electrohub_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://groupthree:group3@localhost/electrohub_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'supersecretkey'
 
@@ -97,7 +97,7 @@ def average_item_ratings(item_id):#Caleb
     
 
 # Check items available for a specific item
-@app.route("/api/item/<int:item_id/items_in_stock")
+@app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
 def items_in_stock_for_items(item_id): #Shalyne
     pass
     
