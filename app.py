@@ -21,7 +21,14 @@ def index():
 
 class CrudItems(Resource):#Caleb
     def get(self):
-        pass
+        items_list = [item.to_dict() for item in Item.query.all()]
+        
+        if not items_list:
+            response = make_response({"message": "No items available"}, 404,)
+            return response
+        
+        response = make_response(items_list, 200,)
+        return response
     
     #Add 'Create Item button' in the frontend
     #Create, Update, Delete only for Admin
@@ -39,39 +46,14 @@ api.add_resource(CrudItems, '/api/items', endpoint="crudItems")
 
 @app.route('/api/item/item_details/<int:item_id>', methods=["GET"])
 def get_item_details(item_id):#Caleb
-    pass
-
-
-@app.route("/api/item/<int:item_id>/add_special_category", methods=["POST"])
-def add_special_category_to_item(item_id):#Shalyne
-    data = request.json
-    special_category_name = data["special_category_name"]
     
-    item = Item.query.get(item_id)
-    special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
-
-    if special_category and item:
-        item.special_categories.append(special_category)
-        db.session.commit()
-        return jsonify({"message": f"Special Category {special_category_name} added to item"}), 200
+    item = Item.query.filter_by(id=item_id).first()
     
-    return jsonify({"message": "Error: Item or Special Category not found"}), 404
-
-
-@app.route("/api/item/<int:item_id>/remove_special_category", methods=["POST"]) #Is the method POST or DELETE?
-def remove_special_category_from_item(item_id):#Shalyne
-    data = request.json
-    special_category_name = data["special_category_name"]
+    if not item:
+        return jsonify({"message": f"Item id {item_id} not found"}), 404
     
-    item = Item.query.get(item_id)
-    special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
-
-    if special_category and item:
-        item.special_categories.remove(special_category)
-        db.session.commit()
-        return jsonify({"message": f"Special Category {special_category_name} removed from item"}), 200
-    
-    return jsonify({"message": "Error: Item or Special Category not found"}), 404
+    response = make_response(item.to_dict(), 200,)
+    return response
 
 
 class ItemReviews(Resource): #Caleb
@@ -96,11 +78,45 @@ def average_item_ratings(item_id):#Caleb
     pass
     
 
-# Check items available for a specific item
-@app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
-def items_in_stock_for_items(item_id): #Shalyne
-    pass
-    
-
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+    
+    
+# @app.route("/api/item/<int:item_id>/add_special_category", methods=["POST"])
+# def add_special_category_to_item(item_id):#Shalyne
+#     data = request.json
+#     special_category_name = data["special_category_name"]
+    
+#     item = Item.query.get(item_id)
+#     special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
+
+#     if special_category and item:
+#         item.special_categories.append(special_category)
+#         db.session.commit()
+#         return jsonify({"message": f"Special Category {special_category_name} added to item"}), 200
+    
+#     return jsonify({"message": "Error: Item or Special Category not found"}), 404
+
+
+# @app.route("/api/item/<int:item_id>/remove_special_category", methods=["POST"]) #Is the method POST or DELETE?
+# def remove_special_category_from_item(item_id):#Shalyne
+#     data = request.json
+#     special_category_name = data["special_category_name"]
+    
+#     item = Item.query.get(item_id)
+#     special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
+
+#     if special_category and item:
+#         item.special_categories.remove(special_category)
+#         db.session.commit()
+#         return jsonify({"message": f"Special Category {special_category_name} removed from item"}), 200
+    
+#     return jsonify({"message": "Error: Item or Special Category not found"}), 404
+
+
+# # Check items available for a specific item
+# @app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
+# def items_in_stock_for_items(item_id): #Shalyne
+#     pass
+    
+

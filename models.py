@@ -12,8 +12,10 @@ metadata = MetaData(naming_convention={
 db = SQLAlchemy(metadata=metadata)
 
 #User Model
-class User(db.Model):
+class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
+    
+    serialize_rules = ('-reviews.user',)
     
     id = id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False, unique=True)
@@ -29,6 +31,8 @@ item_special_categories = db.Table(
 
 class Item(db.Model, SerializerMixin):
     __tablename__ = 'items'
+    
+    serialize_rules = ('-reviews.item', '-reviews.user',)
     
     id = db.Column(db.Integer, primary_key=True)
     item_name = db.Column(db.String, nullable=False, unique=True)
@@ -58,16 +62,20 @@ class Item(db.Model, SerializerMixin):
 # SpecialCategory Model
 class SpecialCategory(db.Model, SerializerMixin):
     __tablename__ = "special_categories"
+    
+    serialize_rules = ('-items',)
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     
     
-class Review(db.Model):
+class Review(db.Model, SerializerMixin):
     __tablename__ = "reviews"
     
+    serialize_rules = ('-item.reviews', '-user.reviews',)
+    
     id = db.Column(db.Integer, primary_key=True)
-    rating = db.Column(db.Integer)
+    rating = db.Column(db.Integer, nullable=False)
     review_message = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=func.now())
     item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
