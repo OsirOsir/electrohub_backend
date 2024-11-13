@@ -35,7 +35,7 @@ class Item(db.Model, SerializerMixin):
     
     serialize_rules = ('-reviews.item', '-reviews.user',)
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     item_name = db.Column(db.String, nullable=False, unique=True)
     item_features = db.Column(JSONB, nullable=False)
     item_price = db.Column(db.Integer, nullable=False)
