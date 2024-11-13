@@ -33,7 +33,27 @@ class CrudItems(Resource):#Caleb
     #Add 'Create Item button' in the frontend
     #Create, Update, Delete only for Admin
     def post(self):
-        pass
+        try:
+            item_name = request.json['item_name']
+            item_features = request.json['item_features']
+            item_price = request.json['item_price']
+            item_image_url = request.json['item_image_url']
+            item_category = request.json['item_category'] #Validate category to be among the provided categories
+            items_in_stock = request.json['items_in_stock']
+            
+            new_item = Item(item_name= item_name, item_features=item_features, item_price= item_price, item_image_url= item_image_url, item_category=item_category, items_in_stock= items_in_stock)
+            
+            db.session.add(new_item)
+            db.session.commit()
+            
+            response = make_response(new_item.to_dict(), 201,)
+            return response
+        
+        except KeyError as e:
+            return jsonify({"message": f"Missing required field: {str(e)}"}), 400
+        
+        except Exception as e:
+            return jsonify({"message": f"An error occurred: {str(e)}"}), 500
     
     def patch(self):
         pass
@@ -44,7 +64,7 @@ class CrudItems(Resource):#Caleb
 api.add_resource(CrudItems, '/api/items', endpoint="crudItems")
 
 
-@app.route('/api/item/item_details/<int:item_id>', methods=["GET"])
+@app.route('/api/item/item_details/item_id/<int:item_id>', methods=["GET"])
 def get_item_details(item_id):#Caleb
     
     item = Item.query.filter_by(id=item_id).first()
@@ -56,7 +76,12 @@ def get_item_details(item_id):#Caleb
     return response
 
 
-class ItemReviews(Resource): #Caleb
+@app.route('/api/items/reviews', methods=['GET'])
+def get_all_reviews(self):
+    pass
+
+
+class ItemReviewsById(Resource): #Caleb
     def get(self):
         pass
     
@@ -70,10 +95,10 @@ class ItemReviews(Resource): #Caleb
     def delete(self):
         pass
 
-api.add_resource(ItemReviews, '/api/items/<int:item_id>/reviews', endpoint="itemReviews")
+api.add_resource(ItemReviewsById, '/api/items/item_id/<int:item_id>/reviews', endpoint="itemReviewsById")
 
 
-@app.route('/api/item/<int:item_id>/average_rating', methods=['GET'])
+@app.route('/api/item/item_id/<int:item_id>/average_rating', methods=['GET'])
 def average_item_ratings(item_id):#Caleb
     pass
     
@@ -81,42 +106,5 @@ def average_item_ratings(item_id):#Caleb
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
     
+
     
-# @app.route("/api/item/<int:item_id>/add_special_category", methods=["POST"])
-# def add_special_category_to_item(item_id):#Shalyne
-#     data = request.json
-#     special_category_name = data["special_category_name"]
-    
-#     item = Item.query.get(item_id)
-#     special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
-
-#     if special_category and item:
-#         item.special_categories.append(special_category)
-#         db.session.commit()
-#         return jsonify({"message": f"Special Category {special_category_name} added to item"}), 200
-    
-#     return jsonify({"message": "Error: Item or Special Category not found"}), 404
-
-
-# @app.route("/api/item/<int:item_id>/remove_special_category", methods=["POST"]) #Is the method POST or DELETE?
-# def remove_special_category_from_item(item_id):#Shalyne
-#     data = request.json
-#     special_category_name = data["special_category_name"]
-    
-#     item = Item.query.get(item_id)
-#     special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
-
-#     if special_category and item:
-#         item.special_categories.remove(special_category)
-#         db.session.commit()
-#         return jsonify({"message": f"Special Category {special_category_name} removed from item"}), 200
-    
-#     return jsonify({"message": "Error: Item or Special Category not found"}), 404
-
-
-# # Check items available for a specific item
-# @app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
-# def items_in_stock_for_items(item_id): #Shalyne
-#     pass
-    
-

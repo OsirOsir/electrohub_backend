@@ -3,6 +3,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import MetaData, func
 from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import JSONB
 
 # Initialize SQLAlchemy and Bcrypt
 metadata = MetaData(naming_convention={
@@ -36,7 +37,7 @@ class Item(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     item_name = db.Column(db.String, nullable=False, unique=True)
-    item_features = db.Column(db.String, nullable=False)
+    item_features = db.Column(JSONB, nullable=False)
     item_price = db.Column(db.Integer, nullable=False)
     item_prev_price = db.Column(db.Integer)
     item_image_url = db.Column(db.Text, nullable=False)
@@ -53,6 +54,9 @@ class Item(db.Model, SerializerMixin):
         secondary=item_special_categories,
         backref=db.backref('items', lazy=True)
     )
+    
+    def __repr__(self):
+        return f'<Item: {self.item_name}, Features: {self.item_features}, Price: {self.item_price}, Category: {self.item_category}'
     
     # Check if the item is in stock
     def is_in_stock(self):

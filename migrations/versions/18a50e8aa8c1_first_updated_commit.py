@@ -1,16 +1,16 @@
-"""Initial migration
+"""First updated commit
 
-Revision ID: 1dd253515efe
+Revision ID: 18a50e8aa8c1
 Revises: 
-Create Date: 2024-11-12 19:36:57.879012
+Create Date: 2024-11-13 12:45:36.802014
 
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '1dd253515efe'
+revision = '18a50e8aa8c1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,7 @@ def upgrade():
     op.create_table('items',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('item_name', sa.String(), nullable=False),
-    sa.Column('item_features', sa.String(), nullable=False),
+    sa.Column('item_features', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('item_price', sa.Integer(), nullable=False),
     sa.Column('item_prev_price', sa.Integer(), nullable=True),
     sa.Column('item_image_url', sa.Text(), nullable=False),
@@ -52,7 +52,7 @@ def upgrade():
     )
     op.create_table('reviews',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('rating', sa.Integer(), nullable=True),
+    sa.Column('rating', sa.Integer(), nullable=False),
     sa.Column('review_message', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('item_id', sa.Integer(), nullable=True),
