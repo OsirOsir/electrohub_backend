@@ -3,6 +3,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import MetaData, func
 from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import JSONB
 
 # Initialize SQLAlchemy and Bcrypt
 metadata = MetaData(naming_convention={
@@ -12,8 +13,10 @@ metadata = MetaData(naming_convention={
 db = SQLAlchemy(metadata=metadata)
 
 #User Model
-class User(db.Model):
+class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
+    
+    serialize_rules = ('-reviews.user',)
     
     id = id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False, unique=True)
@@ -30,9 +33,11 @@ item_special_categories = db.Table(
 class Item(db.Model, SerializerMixin):
     __tablename__ = 'items'
     
+    serialize_rules = ('-reviews.item', '-reviews.user',)
+    
     id = db.Column(db.Integer, primary_key=True)
     item_name = db.Column(db.String, nullable=False, unique=True)
-    item_features = db.Column(db.String, nullable=False)
+    item_features = db.Column(JSONB, nullable=False)
     item_price = db.Column(db.Integer, nullable=False)
     item_prev_price = db.Column(db.Integer)
     item_image_url = db.Column(db.Text, nullable=False)
@@ -50,6 +55,9 @@ class Item(db.Model, SerializerMixin):
         backref=db.backref('items', lazy=True)
     )
     
+    def __repr__(self):
+        return f'<Item: {self.item_name}, Features: {self.item_features}, Price: {self.item_price}, Category: {self.item_category}'
+    
     # Check if the item is in stock
     def is_in_stock(self):
         return self.items_in_stock > 0
@@ -58,16 +66,20 @@ class Item(db.Model, SerializerMixin):
 # SpecialCategory Model
 class SpecialCategory(db.Model, SerializerMixin):
     __tablename__ = "special_categories"
+    
+    serialize_rules = ('-items',)
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     
     
-class Review(db.Model):
+class Review(db.Model, SerializerMixin):
     __tablename__ = "reviews"
     
+    serialize_rules = ('-item.reviews', '-user.reviews',)
+    
     id = db.Column(db.Integer, primary_key=True)
-    rating = db.Column(db.Integer)
+    rating = db.Column(db.Integer, nullable=False)
     review_message = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=func.now())
     item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
