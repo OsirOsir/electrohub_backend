@@ -319,7 +319,6 @@ def best_sellers_items():
         return make_response(jsonify(items_list), 200)
     
     return jsonify({"message": "No offer items in Best Sellers section."}, 404)
-    
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
