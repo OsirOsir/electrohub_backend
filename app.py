@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_restful import Api, Resource
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://groupthree:group3@localhost/electrohub_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'supersecretkey'
@@ -115,7 +115,7 @@ class CrudItemsById(Resource):
 api.add_resource(CrudItemsById, '/api/items/item_id/<int:item_id>', endpoint="crudItemsById")
 
 
-@app.route('/api/item/item_details/item_id/<int:item_id>', methods=["GET"])
+@app.route('/api/item_details/item_id/<int:item_id>', methods=["GET"])
 def get_item_details(item_id):
     
     item = Item.query.filter_by(id=item_id).first()
@@ -181,7 +181,7 @@ class ItemReviewsById(Resource):
         except Exception as e:
             return {"message": f"An error occurred: {str(e)}"}, 500
             
-api.add_resource(ItemReviewsById, '/api/items/item_id/<int:item_id>/reviews', endpoint="itemReviewsById")
+api.add_resource(ItemReviewsById, '/api/item_id/<int:item_id>/reviews', endpoint="itemReviewsById")
     
 class ModifyItemReviewById(Resource):
     #Add constraints and validations to the fields when PATCHing new review, all the required fields should be filled and descriptive messages in case of errors
@@ -235,6 +235,46 @@ def average_item_ratings(item_id):
     average_rating = round(average_rating, 1)
     
     return jsonify({"average_rating": average_rating}), 200
+
+
+@app.route("/api/items/daily_deals", methods=["GET"])
+def daily_deals_items():
+    items_list = [item.to_dict() for item in Item.query.join(Item.special_categories).filter(SpecialCategory.name == "daily_deals").all()]
+        
+    if items_list:  
+        return make_response(jsonify(items_list), 200)
+    
+    return jsonify({"message": "No offer items in Daily Deals section."}, 404)
+
+
+@app.route("/api/items/hot_&_new", methods=["GET"])
+def hot_n_new_items():
+    items_list = [item.to_dict() for item in Item.query.join(Item.special_categories).filter(SpecialCategory.name == "hot_&_new").all()]
+        
+    if items_list:  
+        return make_response(jsonify(items_list), 200)
+    
+    return jsonify({"message": "No offer items in Hot & New section."}, 404)
+
+
+@app.route("/api/items/season_offers", methods=["GET"])
+def season_offers_items():
+    items_list = [item.to_dict() for item in Item.query.join(Item.special_categories).filter(SpecialCategory.name == "season_offers").all()]
+        
+    if items_list:  
+        return make_response(jsonify(items_list), 200)
+    
+    return jsonify({"message": "No offer items in Season Offers section."}, 404)
+
+
+@app.route("/api/items/best_sellers", methods=["GET"])
+def best_sellers_items():
+    items_list = [item.to_dict() for item in Item.query.join(Item.special_categories).filter(SpecialCategory.name == "best_sellers").all()]
+        
+    if items_list:  
+        return make_response(jsonify(items_list), 200)
+    
+    return jsonify({"message": "No offer items in Best Sellers section."}, 404)
     
 
 if __name__ == '__main__':

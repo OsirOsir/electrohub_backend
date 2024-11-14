@@ -131,7 +131,7 @@ with app.app_context():
     
     special_categories = [
         SpecialCategory(name= "daily_deals"),
-        SpecialCategory(name= "best_seller"),
+        SpecialCategory(name= "best_sellers"),
         SpecialCategory(name= "season_offers"),
         SpecialCategory(name= "hot_&_new")
     ]
@@ -145,7 +145,7 @@ with app.app_context():
     print("Adding items to special categories...")
     
     daily_deals_special_category = SpecialCategory.query.filter_by(name = "daily_deals").first()
-    best_seller_special_category = SpecialCategory.query.filter_by(name = "best_seller").first()
+    best_seller_special_category = SpecialCategory.query.filter_by(name = "best_sellers").first()
     hot_new_special_category = SpecialCategory.query.filter_by(name = "hot_&_new").first()
     season_offers_special_category = SpecialCategory.query.filter_by(name = "season_offers").first()
     
