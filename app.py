@@ -19,6 +19,50 @@ CORS(app, supports_credentials=True)
 def index():
     return "<h1>Welcome to Electrohub</h1>"
 
+
+@app.route("/api/item/<int:item_id>/add_special_category", methods=["POST"])
+def add_special_category_to_item(item_id):
+    data = request.json
+    special_category_name = data["special_category_name"]
+    
+    item = Item.query.get(item_id)
+    special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
+
+    if special_category and item:
+        item.special_categories.append(special_category)
+        db.session.commit()
+        return jsonify({"message": f"Item id {item.id} {item.item_name} added to special Category {special_category_name}"}), 200
+    
+    return jsonify({"message": "Error: Item or Special Category not found"}), 404
+
+
+@app.route("/api/item/<int:item_id>/remove_special_category", methods=["DELETE"])
+def remove_special_category_from_item(item_id):
+    data = request.json
+    special_category_name = data["special_category_name"]
+    
+    item = Item.query.get(item_id)
+    special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
+
+    if special_category and item:
+        item.special_categories.remove(special_category)
+        db.session.commit()
+        return jsonify({"message": f"Item id {item.id} {item.item_name} removed from special Category {special_category_name}"}), 200
+    
+    return jsonify({"message": "Error: Item or Special Category not found"}), 404
+
+# Check items available for a specific item
+@app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
+def items_in_stock_for_items(item_id):
+
+    item = Item.query.get(item_id)
+    
+    if item:
+        return jsonify({"item_name": item.item_name, "items_in_stock": item.items_in_stock}), 200
+    else:
+        return jsonify({"message": "Item not found"}), 404
+    
+
 class CrudItems(Resource):
     def get(self):
         items_list = [item.to_dict() for item in Item.query.all()]

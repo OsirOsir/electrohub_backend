@@ -41,7 +41,6 @@ with app.app_context():
     
     print("Seeding items...")
     
-    
     items = [
         Item(item_name= "Pixel 8 Pro", item_features={"feature1": "50MP main camera", "feature2": "Google Tensor G2 processor", "feature3": "120Hz display"}, item_price= 99900, item_prev_price= 1, item_image_url= "images/Pixel 8 Pro.jpeg", item_category= "Smartphone", items_in_stock= 7),
         Item(item_name= "MacBook Pro 14-inch", item_features={"feature1": "M2 Pro/Max chip", "feature2": "Liquid Retina XDR display", "feature3": "MagSafe charging"}, item_price= 199900, item_prev_price= 1, item_image_url= "images/MacBook Pro 14-inch.jpg", item_category= "Laptop", items_in_stock= 7),
@@ -249,5 +248,7 @@ with app.app_context():
     db.session.commit()
 
     print("Database seeded successfully!")
+    
+    
     
     
