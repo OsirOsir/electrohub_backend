@@ -158,6 +158,40 @@ def get_user_by_id(id):
         return jsonify(user_serializer(user)), 200
     return jsonify({'error': 'User not found'}), 404
 
+@app.route('/api/users/update', methods=['PATCH'])
+@login_required
+def update_user():
+    data = request.json
+
+    # Check if there is any data to update
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    updated_name = data.get('name')
+    updated_password = data.get('password')
+
+    # Ensure that at least one field (name or password) is provided for update
+    if not updated_name and not updated_password:
+        return jsonify({'error': 'No name or password provided to update'}), 400
+
+    try:
+        # Update the name if it's provided
+        if updated_name:
+            current_user.name = updated_name
+
+        # Update the password if it's provided
+        if updated_password:
+            hashed_password = bcrypt.generate_password_hash(updated_password).decode('utf-8')
+            current_user.password = hashed_password
+
+        db.session.commit()
+        return jsonify({'message': 'Profile updated successfully', 'user': user_serializer(current_user)}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
 # Admin delete user
 @app.route('/api/users/<int:id>', methods=['DELETE'])
 @login_required
