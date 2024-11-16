@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from models import db, User, Product
+from models import db, User, Product, Cart
 from flask_migrate import Migrate
 from serializer import user_serializer, product_serializer
 from flask_bcrypt import Bcrypt
@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://groupthree:group3@localhos
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'supersecretkey'
 
+# Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
@@ -65,7 +66,7 @@ def handle_users():
                 email=data['email'],
                 role=role
             )
-            new_user.password = data['password']  
+            new_user.password = data['password']
             db.session.add(new_user)
             db.session.commit()
 
@@ -158,28 +159,25 @@ def get_user_by_id(id):
         return jsonify(user_serializer(user)), 200
     return jsonify({'error': 'User not found'}), 404
 
+# Update user profile
 @app.route('/api/users/update', methods=['PATCH'])
 @login_required
 def update_user():
     data = request.json
 
-    # Check if there is any data to update
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
     updated_name = data.get('name')
     updated_password = data.get('password')
 
-    # Ensure that at least one field (name or password) is provided for update
     if not updated_name and not updated_password:
         return jsonify({'error': 'No name or password provided to update'}), 400
 
     try:
-        # Update the name if it's provided
         if updated_name:
             current_user.name = updated_name
 
-        # Update the password if it's provided
         if updated_password:
             hashed_password = bcrypt.generate_password_hash(updated_password).decode('utf-8')
             current_user.password = hashed_password
@@ -190,7 +188,6 @@ def update_user():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
 
 # Admin delete user
 @app.route('/api/users/<int:id>', methods=['DELETE'])
@@ -207,6 +204,81 @@ def delete_user(id):
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'User not found'}), 404
+
+# View cart
+@app.route('/api/cart', methods=['GET'])
+@login_required
+def view_cart():
+    # Fetch cart items for the current user
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    print(f"Found {len(cart_items)} cart items for user {current_user.id}")
+
+    if not cart_items:
+        return jsonify({'message': 'Your cart is empty.'}), 200
+
+    cart_data = []
+    for item in cart_items:
+        print(f"Item: {item}, Product: {item.product}")  
+        cart_data.append({
+            'product': product_serializer(item.product),
+            'quantity': item.quantity
+        })
+
+    return jsonify({'cart': cart_data}), 200
+
+
+# Add product to cart
+@app.route('/api/cart', methods=['POST'])
+@login_required
+def add_to_cart():
+    data = request.json
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
+
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+
+    if cart_item:
+        cart_item.quantity += quantity
+    else:
+        cart_item = Cart(user_id=current_user.id, product_id=product_id, quantity=quantity)
+        db.session.add(cart_item)
+
+    db.session.commit()
+    return jsonify({'message': 'Product added to cart successfully'}), 201
+
+# Remove product from cart
+@app.route('/api/cart/<int:product_id>', methods=['DELETE'])
+@login_required
+def remove_from_cart(product_id):
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    if not cart_item:
+        return jsonify({'error': 'Product not in cart'}), 404
+
+    db.session.delete(cart_item)
+    db.session.commit()
+    return jsonify({'message': 'Product removed from cart'}), 204
+
+# Update cart quantity
+@app.route('/api/cart/<int:product_id>', methods=['PATCH'])
+@login_required
+def update_cart_quantity(product_id):
+    data = request.json
+    quantity = data.get('quantity')
+
+    if not quantity or quantity <= 0:
+        return jsonify({'error': 'Invalid quantity'}), 400
+
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    if not cart_item:
+        return jsonify({'error': 'Product not in cart'}), 404
+
+    cart_item.quantity = quantity
+    db.session.commit()
+    return jsonify({'message': 'Cart updated successfully'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

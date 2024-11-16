@@ -1,8 +1,7 @@
-from models import db, User, Product  
+from models import db, User, Product, Cart  # Ensure Cart is imported
 from app import app
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import text  
-
+from sqlalchemy import text
 
 def create_users():
     """Create and return admin and regular users."""
@@ -28,7 +27,6 @@ def create_users():
     regular_user1.password = "userpassword1"  
 
     return admin_user, regular_user, regular_user1
-
 
 def create_products(admin_user):
     """Create electronics products associated with the admin user."""
@@ -58,14 +56,15 @@ def create_products(admin_user):
     return products
 
 
-# Function to seed data
 def seed_data():
     """Seed the database with sample data."""
     try:
-        # Create users
+        
         admin_user, regular_user, regular_user1 = create_users()
         db.session.add(admin_user)
         db.session.add_all([regular_user, regular_user1])
+
+        
         db.session.commit()
 
         
@@ -73,7 +72,14 @@ def seed_data():
         db.session.add_all(products)
         db.session.commit()
 
-        print("Database seeded successfully with Admin, Users, and Products!")
+        
+        add_cart_items_for_user(regular_user, products)  
+        add_cart_items_for_user(regular_user1, products)  
+
+        
+        db.session.commit()
+
+        print("Database seeded successfully with Admin, Users, Products, and Cart Items!")
 
     except IntegrityError as ie:
         print(f"Integrity error occurred: {ie}")
@@ -81,19 +87,24 @@ def seed_data():
 
     except Exception as e:
         print(f"An error occurred while seeding the database: {e}")
-        db.session.rollback() 
+        db.session.rollback()
 
+
+def add_cart_items_for_user(user, products):
+    """Add sample cart items for a user."""
+    cart_items = [
+        Cart(user_id=user.id, product_id=products[0].id, quantity=2),  
+        Cart(user_id=user.id, product_id=products[1].id, quantity=1)   
+    ]
+    db.session.add_all(cart_items)
 
 # Set up and seed the database
 with app.app_context():
     try:
-        db.session.execute(text("DROP TABLE IF EXISTS items CASCADE"))
-        db.session.execute(text("DROP TABLE IF EXISTS products CASCADE"))
-        db.session.execute(text("DROP TABLE IF EXISTS users CASCADE"))
-        db.session.commit()
-
+        
+        db.drop_all()  
         db.create_all()  
-        seed_data()  
+        seed_data() 
 
     except Exception as e:
         print(f"An error occurred while setting up the database: {e}")
