@@ -38,7 +38,7 @@ def admin_required(f):
 
 @app.route('/')
 def index():
-    return "<h1>Welcome to ShopSphere</h1>"
+    return "<h1>Welcome to ElectroHub</h1>"
 
 # Handle users (GET and POST)
 @app.route('/api/users', methods=['GET', 'POST'])
