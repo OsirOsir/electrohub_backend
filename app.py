@@ -22,34 +22,49 @@ def index():
 
 @app.route("/api/item/<int:item_id>/add_special_category", methods=["POST"])
 def add_special_category_to_item(item_id):
-    data = request.json
-    special_category_name = data["special_category_name"]
+    
+    special_category_name = request.json["special_category_name"]
     
     item = Item.query.get(item_id)
     special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
-
-    if special_category and item:
-        item.special_categories.append(special_category)
-        db.session.commit()
-        return jsonify({"message": f"Item id {item.id} {item.item_name} added to special Category {special_category_name}"}), 200
     
-    return jsonify({"message": "Error: Item or Special Category not found"}), 404
+    if not item:
+        return jsonify({"message": f"Item ID {item_id} not found."}), 404
 
+    if not special_category:
+        return jsonify({"message": f"Special Category '{special_category_name}' not found."}), 404
 
+    if special_category in item.special_categories:
+        return jsonify({"message": f"Item Id {item.id} is already in special category {special_category_name}."}), 200
+    
+    item.special_categories.append(special_category)
+    db.session.commit()
+    
+    return jsonify({"message": f"Item id {item.id} {item.item_name} added to special Category {special_category_name}."}), 200
+    
+    
 @app.route("/api/item/<int:item_id>/remove_special_category", methods=["DELETE"])
 def remove_special_category_from_item(item_id):
-    data = request.json
-    special_category_name = data["special_category_name"]
+    
+    special_category_name = request.json["special_category_name"]
     
     item = Item.query.get(item_id)
     special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
 
-    if special_category and item:
-        item.special_categories.remove(special_category)
-        db.session.commit()
-        return jsonify({"message": f"Item id {item.id} {item.item_name} removed from special Category {special_category_name}"}), 200
+    if not item:
+        return jsonify({"message": f"Item ID {item_id} not found."}), 404
+
+    if not special_category:
+        return jsonify({"message": f"Special Category '{special_category_name}' not found."}), 404
+
+    if special_category not in item.special_categories:
+        return jsonify({"message": f"Item Id {item.id} is not in special category {special_category_name}."}), 200
     
-    return jsonify({"message": "Error: Item or Special Category not found"}), 404
+    item.special_categories.remove(special_category)
+    db.session.commit()
+    
+    return jsonify({"message": f"Item id {item.id} {item.item_name} removed from special Category {special_category_name}."}), 200
+
 
 # Check items available for a specific item
 @app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
@@ -77,7 +92,6 @@ class CrudItems(Resource):
     #Add 'Create Item button' in the frontend
     #Create, Update, Delete only for Admin and when logged in
     def post(self):
-        #Add constraints and validations to the fields when POSTing new review, all the required fields should be filled and descriptive messages in case of errors
         try:
             item_name = request.json['item_name']
             item_features = request.json['item_features']
@@ -85,6 +99,25 @@ class CrudItems(Resource):
             item_image_url = request.json['item_image_url']
             item_category = request.json['item_category']
             items_in_stock = request.json['items_in_stock']
+            
+            categories = ['Smartphone', 'Laptop', 'Desktop', 'TV', 'Earbuds', 'Headphones', 'Sound system', 'Speakers', 'Smartwatch', 'Tablet']
+            
+            item_price = int(item_price)
+            items_in_stock = int(items_in_stock)
+            
+            if not item_name or not item_features or not item_price or not item_image_url or not item_category or not items_in_stock:
+                return make_response({"message": "All fields should be filled."}, 400)
+            
+            if item_price <= 0:
+                return make_response({"message": "Item price should be greater than 0."}, 400)
+            
+            if items_in_stock < 0:
+                return make_response({"message": "Items in stock cannot be a negative number"}, 400)
+            
+            item_category = item_category.strip().capitalize()
+            
+            if item_category not in categories:
+                return make_response({"message": f"Input category '{item_category}' is invalid. Allowed categories are: {', '.join(categories)}."}, 400)
 
             new_item = Item(
                 item_name=item_name,
@@ -120,19 +153,36 @@ api.add_resource(CrudItems, '/api/items', endpoint="crudItems")
 
 
 class CrudItemsById(Resource):
-    #Add constraints and validations to the fields when PATCHing new review, all the required fields should be filled and descriptive messages in case of errors
     def patch(self, item_id):
         
         item = Item.query.filter(Item.id == item_id).first()
         
         if not item:
-            response_dict = {"message": f"Item id {item_id} not found"}
-            return make_response(response_dict, 404)
+            return make_response({"message": f"Item id {item_id} not found"}, 404)
         
-        for attr in request.json:
+        changes_made = False
+        updated_category = None
+        
+        for attr, new_value in request.json.items():
             if hasattr(item, attr):
-                setattr(item, attr, request.json[attr])
-                
+                if getattr(item, attr) != new_value:
+                    if attr == 'item_category':
+                        updated_category = new_value.strip().capitalize()
+                    else:
+                        setattr(item, attr, new_value)
+                    changes_made = True
+                    
+        if not changes_made:
+            return make_response({"message": "No changes made. The provided data is the same as the current."}, 400)
+        
+        if updated_category:
+            categories = ['Smartphone', 'Laptop', 'Desktop', 'TV', 'Earbuds', 'Headphones', 'Sound system', 'Speakers', 'Smartwatch', 'Tablet']
+            
+            if updated_category not in categories:
+                return make_response({"message": f"Input category '{updated_category}' is invalid. Allowed categories are: {', '.join(categories)}."}, 400)
+            
+            item.item_category = updated_category
+            
         db.session.add(item)
         db.session.commit()
         
@@ -197,7 +247,7 @@ class ItemReviewsById(Resource):
     
     # A user should be signed In to be able to POST, PATCH, DELETE a review
     def post(self, item_id):
-        #Add constraints and validations to the fields when POSTing new review, all the required fields should be filled and descriptive messages in case of errors
+        
         try:
             rating = request.json['rating']
             review_message = request.json['review_message']
@@ -320,7 +370,7 @@ def best_sellers_items():
     
     return jsonify({"message": "No offer items in Best Sellers section."}, 404)
 
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
     
-
