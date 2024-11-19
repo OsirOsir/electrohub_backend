@@ -1,11 +1,19 @@
 {
     "_meta": {
         "hash": {
+<<<<<<< HEAD
             "sha256": "702ad05de9bc9de99a4807c8dde1686f31e0041d7b5f6f6b74861195a52110f5"
         },
         "pipfile-spec": 6,
         "requires": {
             "python_version": "3.12"
+=======
+            "sha256": "7f7606f08e0544d8d012ef4d097dabdd6df6843a28793eb6551245d4b2db4242"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.8"
+>>>>>>> origin/JK_user_cart
         },
         "sources": [
             {
