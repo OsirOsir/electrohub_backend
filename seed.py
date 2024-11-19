@@ -27,11 +27,11 @@ with app.app_context():
     print("Seeding users...")
     
     users = [
-        User(id=1, username= "User 1"),
+        User(id=1, username= "User 1", role = 'Admin'),
         User(id=2, username= "User 2"),
-        User(id=3, username= "User 3"),
+        User(id=3, username= "User 3", role = 'Admin'),
         User(id=4, username= "User 4"),
-        User(id=5, username= "User 5")
+        User(id=5, username= "User 5", role = 'Admin')
     ]
     
     db.session.add_all(users)
@@ -237,7 +237,53 @@ with app.app_context():
     
     print("Seeding item reviews...")
     reviews = [
-        Review(rating = 1, review_message = "", item_id = 1, user_id = 1)
+        Review(rating = 1, review_message = "The item is amazing.", item_id = 1, user_id = 1),
+        Review(rating=4, review_message="This item exceeded my expectations!", item_id=23, user_id=3),
+        Review(rating=2, review_message="Not impressed, could be better.", item_id=56, user_id=2),
+        Review(rating=5, review_message="Absolutely love it! Highly recommend.", item_id=12, user_id=1),
+        Review(rating=3, review_message="Decent product, but not amazing.", item_id=45, user_id=4),
+        Review(rating=1, review_message="Very disappointed with this purchase.", item_id=72, user_id=5),
+        Review(rating=4, review_message="Good value for the price.", item_id=34, user_id=3),
+        Review(rating=5, review_message="Best item I've bought in a long time!", item_id=17, user_id=2),
+        Review(rating=2, review_message="Not worth the money, unfortunately.", item_id=68, user_id=1),
+        Review(rating=3, review_message="Okay product, could use some improvement.", item_id=5, user_id=4),
+        Review(rating=4, review_message="Satisfied with my purchase.", item_id=29, user_id=5),
+        Review(rating=1, review_message="Terrible product, do not buy!", item_id=76, user_id=3),
+        Review(rating=5, review_message="Amazing quality, highly recommend!", item_id=10, user_id=2),
+        Review(rating=3, review_message="Mixed feelings about this item.", item_id=42, user_id=1),
+        Review(rating=4, review_message="Good overall, but could be better.", item_id=61, user_id=4),
+        Review(rating=5, review_message="Absolutely love it! Highly recommend.", item_id=1, user_id=3),
+        Review(rating=5, review_message="Love it! Perfect for what I needed.", item_id=2, user_id=5),
+        Review(rating=2, review_message="Disappointed with the performance.", item_id=58, user_id=3),
+        Review(rating=4, review_message="Solid product, would buy again.", item_id=15, user_id=2),
+        Review(rating=1, review_message="Waste of money, do not recommend.", item_id=70, user_id=1),
+        Review(rating=3, review_message="Okay product, nothing special.", item_id=37, user_id=4),
+        Review(rating=4, review_message="Happy with my purchase, good value.", item_id=8, user_id=5),
+        Review(rating=3, review_message="Decent product, could be better.", item_id=5, user_id=2),
+        Review(rating=5, review_message="Amazing quality, highly recommend!", item_id=10, user_id=3),
+        Review(rating=1, review_message="Very disappointed with this purchase.", item_id=72, user_id=4),
+        Review(rating=4, review_message="Good value for the price.", item_id=34, user_id=1),
+        Review(rating=2, review_message="Not impressed, could be better.", item_id=56, user_id=5),
+        Review(rating=3, review_message="Okay product, could use some improvement.", item_id=5, user_id=3),
+        Review(rating=4, review_message="Satisfied with my purchase.", item_id=29, user_id=2),
+        Review(rating=1, review_message="Terrible product, do not buy!", item_id=76, user_id=1),
+        Review(rating=5, review_message="Best item I've bought in a long time!", item_id=17, user_id=4),
+        Review(rating=2, review_message="Not worth the money, unfortunately.", item_id=68, user_id=5),
+        Review(rating=4, review_message="Good overall, but could be better.", item_id=61, user_id=3),
+        Review(rating=1, review_message="Waste of money, do not recommend.", item_id=70, user_id=2),
+        Review(rating=5, review_message="Absolutely love it! Highly recommend.", item_id=12, user_id=1),
+        Review(rating=3, review_message="Mixed feelings about this item.", item_id=42, user_id=4),
+        Review(rating=2, review_message="Not impressed, could be better.", item_id=1, user_id=4),
+        Review(rating=2, review_message="Disappointed with the performance.", item_id=58, user_id=5),
+        Review(rating=4, review_message="This item exceeded my expectations!", item_id=23, user_id=3),
+        Review(rating=1, review_message="Very disappointed with this purchase.", item_id=72, user_id=2),
+        Review(rating=5, review_message="Amazing quality, highly recommend!", item_id=10, user_id=1),
+        Review(rating=3, review_message="Decent product, but not amazing.", item_id=45, user_id=4),
+        Review(rating=4, review_message="Good value for the price.", item_id=1, user_id=5),
+        Review(rating=4, review_message="Good value for the price.", item_id=1, user_id=1),
+        Review(rating=2, review_message="Not impressed, could be better.", item_id=1, user_id=5),
+        Review(rating=3, review_message="Okay product, could use some improvement.", item_id=5, user_id=3),
+        Review(rating=4, review_message="Satisfied with my purchase.", item_id=29, user_id=2),
     ]
     
     db.session.add_all(reviews)

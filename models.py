@@ -20,6 +20,8 @@ class User(db.Model, SerializerMixin):
     
     id = id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False, unique=True)
+    role = db.Column(db.String(50), default='user')
+    is_active = db.Column(db.Boolean, default=True)
     
     reviews = db.relationship('Review', back_populates="user", cascade='all, delete-orphan')
     

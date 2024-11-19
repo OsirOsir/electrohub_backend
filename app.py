@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, make_response
+from flask import Flask, jsonify, request, render_template, make_response, session
 from models import db, Item, SpecialCategory, User, Review
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
@@ -69,15 +69,19 @@ def remove_special_category_from_item(item_id):
 # Check items available for a specific item
 @app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
 def items_in_stock_for_items(item_id):
-
-    item = Item.query.get(item_id)
     
-    if item:
+    try:
+        item = Item.query.get(item_id)
+        
+        if not item:
+            return jsonify({"message": "Item not found"}), 404
+        
         return jsonify({"item_name": item.item_name, "items_in_stock": item.items_in_stock}), 200
-    else:
-        return jsonify({"message": "Item not found"}), 404
     
-
+    except Exception as e:
+        return jsonify({"message": "An error occured while retrieving item data"}), 500
+        
+    
 class CrudItems(Resource):
     def get(self):
         items_list = [item.to_dict() for item in Item.query.all()]
@@ -89,9 +93,18 @@ class CrudItems(Resource):
         response = make_response(items_list, 200,)
         return response
     
-    #Add 'Create Item button' in the frontend
-    #Create, Update, Delete only for Admin and when logged in
+    
     def post(self):
+        
+        # And has to have the user role of 'Admin'
+        if 'user_id' not in session:
+            return {'error': 'Unauthorized: Please log in first'}, 401
+        
+        user = User.query.filter_by(id=session['user_id']).first()
+        
+        if not user or user.role != 'Admin':
+            return {'error': 'Forbidden: Only admins can perform this action'}, 403
+        
         try:
             item_name = request.json['item_name']
             item_features = request.json['item_features']
@@ -155,6 +168,15 @@ api.add_resource(CrudItems, '/api/items', endpoint="crudItems")
 class CrudItemsById(Resource):
     def patch(self, item_id):
         
+        # And has to have the user role of 'Admin'
+        if 'user_id' not in session:
+            return {'error': 'Unauthorized: Please log in first'}, 401
+        
+        user = User.query.filter_by(id=session['user_id']).first()
+        
+        if not user or user.role != 'Admin':
+            return {'error': 'Forbidden: Only admins can perform this action'}, 403
+        
         item = Item.query.filter(Item.id == item_id).first()
         
         if not item:
@@ -191,6 +213,15 @@ class CrudItemsById(Resource):
         return make_response(jsonify(response_dict), 200)
     
     def delete(self, item_id):
+        
+        # And has to have the user role of 'Admin'
+        if 'user_id' not in session:
+            return {'error': 'Unauthorized: Please log in first'}, 401
+        
+        user = User.query.filter_by(id=session['user_id']).first()
+        
+        if not user or user.role != 'Admin':
+            return {'error': 'Forbidden: Only admins can perform this action'}, 403
         
         item = Item.query.filter(Item.id == item_id).first()
         
@@ -245,14 +276,17 @@ class ItemReviewsById(Resource):
         response = make_response(reviews_list, 200)
         return response
     
-    # A user should be signed In to be able to POST, PATCH, DELETE a review
+
     def post(self, item_id):
+        
+        if 'user_id' not in session:
+            return {'error': 'Unauthorized'}, 401
         
         try:
             rating = request.json['rating']
             review_message = request.json['review_message']
-            user_id = request.json['user_id']
-            # item_id = item_id
+            user_id = session['user_id']
+            
             
             new_review = Review(rating=rating, review_message=review_message, item_id=item_id, user_id=user_id)
             
@@ -278,12 +312,20 @@ class ItemReviewsById(Resource):
 api.add_resource(ItemReviewsById, '/api/item_id/<int:item_id>/reviews', endpoint="itemReviewsById")
     
 class ModifyItemReviewById(Resource):
-    #Add constraints and validations to the fields when PATCHing new review, all the required fields should be filled and descriptive messages in case of errors
+    
     def patch(self, review_id):
+        
+        # Also that the user.id matches the user.id of the owner of the review
+        if 'user_id' not in session:
+            return {'error': 'Unauthorized'}, 401
+        
         review = Review.query.filter(Review.id == review_id).first()
         
         if not review:
             return make_response({"message": f"Review id {review_id} not found"})
+        
+        if review.user_id != session['user_id']:
+            return {'error': 'Forbidden: You can only edit your own reviews'}, 403
         
         for attr in request.json:
             if hasattr(review, attr):
@@ -296,11 +338,19 @@ class ModifyItemReviewById(Resource):
     
     
     def delete(self, review_id):
+        
+        # Also that the user.id matches the user.id of the owner of the review
+        if 'user_id' not in session:
+            return {'error': 'Unauthorized'}, 401
+        
         review = Review.query.filter_by(id=review_id).first()
         
         if not review:
             response = make_response({"message": f"Review id {review_id} not found."}, 200)
             return response
+        
+        if review.user_id != session['user_id']:
+            return {'error': 'Forbidden: You can only edit your own reviews'}, 403
         
         db.session.delete(review)
         db.session.commit()
@@ -373,4 +423,5 @@ def best_sellers_items():
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+    
     
