@@ -6,6 +6,7 @@ from flask_login import UserMixin
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
+
 # User Model
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
