@@ -11,6 +11,10 @@ with app.app_context():
     
     db.session.execute(text("DELETE FROM reviews WHERE item_id IS NOT NULL"))
     db.session.commit()
+    db.session.commit()
+    
+    db.session.execute(text("DELETE FROM reviews WHERE item_id IS NOT NULL"))
+    db.session.commit()
     
     #Remove all rows from the tables
     Item.query.delete()
@@ -18,10 +22,12 @@ with app.app_context():
     User.query.delete()
     Review.query.delete()
     db.session.commit()
+    db.session.commit()
     
     #Reset primary key sequences to start at 1
     db.session.execute(text("ALTER SEQUENCE items_id_seq RESTART WITH 1;"))
     db.session.execute(text("ALTER SEQUENCE special_categories_id_seq RESTART WITH 1;"))
+    db.session.commit()
     db.session.commit()
     
     print("Seeding users...")
@@ -131,6 +137,7 @@ with app.app_context():
     special_categories = [
         SpecialCategory(name= "daily_deals"),
         SpecialCategory(name= "best_sellers"),
+        SpecialCategory(name= "best_sellers"),
         SpecialCategory(name= "season_offers"),
         SpecialCategory(name= "hot_&_new")
     ]
@@ -144,6 +151,7 @@ with app.app_context():
     print("Adding items to special categories...")
     
     daily_deals_special_category = SpecialCategory.query.filter_by(name = "daily_deals").first()
+    best_seller_special_category = SpecialCategory.query.filter_by(name = "best_sellers").first()
     best_seller_special_category = SpecialCategory.query.filter_by(name = "best_sellers").first()
     hot_new_special_category = SpecialCategory.query.filter_by(name = "hot_&_new").first()
     season_offers_special_category = SpecialCategory.query.filter_by(name = "season_offers").first()
@@ -294,6 +302,8 @@ with app.app_context():
     db.session.commit()
 
     print("Database seeded successfully!")
+    
+    
     
     
     

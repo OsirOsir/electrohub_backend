@@ -1,3 +1,5 @@
+from flask import Flask, jsonify, request, render_template, make_response
+from models import db, Item, SpecialCategory, User, Review
 from flask import Flask, jsonify, request, render_template, make_response, session
 from models import db, Item, SpecialCategory, User, Review
 from flask_migrate import Migrate
@@ -5,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_restful import Api, Resource
 from flask_cors import CORS
 
+app = Flask(__name__, static_folder='static')
 app = Flask(__name__, static_folder='static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://groupthree:group3@localhost/electrohub_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -45,27 +48,37 @@ def add_special_category_to_item(item_id):
     
 @app.route("/api/item/<int:item_id>/remove_special_category", methods=["DELETE"])
 def remove_special_category_from_item(item_id):
+    try:
+        data = request.json
+        if not data or "special_category_name" not in data:
+            return jsonify({"message": "Error: Missing special_category_name in request body"}), 400
+
+        special_category_name = data["special_category_name"]
+        item = Item.query.get(item_id)
+        special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
     
-    special_category_name = request.json["special_category_name"]
+        special_category_name = request.json["special_category_name"]
     
-    item = Item.query.get(item_id)
-    special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
+        item = Item.query.get(item_id)
+        special_category = SpecialCategory.query.filter_by(name=special_category_name).first()
 
-    if not item:
-        return jsonify({"message": f"Item ID {item_id} not found."}), 404
+        if not item:
+            return jsonify({"message": f"Item ID {item_id} not found."}), 404
 
-    if not special_category:
-        return jsonify({"message": f"Special Category '{special_category_name}' not found."}), 404
+        if not special_category:
+            return jsonify({"message": f"Special Category '{special_category_name}' not found."}), 404
 
-    if special_category not in item.special_categories:
-        return jsonify({"message": f"Item Id {item.id} is not in special category {special_category_name}."}), 200
+        if special_category not in item.special_categories:
+            return jsonify({"message": f"Item Id {item.id} is not in special category {special_category_name}."}), 200
+        
+        item.special_categories.remove(special_category)
+        db.session.commit()
+        
+        return jsonify({"message": f"Item id {item.id} {item.item_name} removed from special Category {special_category_name}."}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
     
-    item.special_categories.remove(special_category)
-    db.session.commit()
-    
-    return jsonify({"message": f"Item id {item.id} {item.item_name} removed from special Category {special_category_name}."}), 200
-
-
 # Check items available for a specific item
 @app.route("/api/item/<int:item_id>/items_in_stock", methods=["GET"])
 def items_in_stock_for_items(item_id):
@@ -77,11 +90,9 @@ def items_in_stock_for_items(item_id):
             return jsonify({"message": "Item not found"}), 404
         
         return jsonify({"item_name": item.item_name, "items_in_stock": item.items_in_stock}), 200
-    
     except Exception as e:
         return jsonify({"message": "An error occured while retrieving item data"}), 500
-        
-    
+
 class CrudItems(Resource):
     def get(self):
         items_list = [item.to_dict() for item in Item.query.all()]
@@ -93,10 +104,10 @@ class CrudItems(Resource):
         response = make_response(items_list, 200,)
         return response
     
-    
+    #Add 'Create Item button' in the frontend
+    #Create, Update, Delete only for Admin and when logged in
     def post(self):
-        
-        # And has to have the user role of 'Admin'
+        #Add constraints and validations to the fields when POSTing new review, all the required fields should be filled and descriptive messages in case of errors
         if 'user_id' not in session:
             return {'error': 'Unauthorized: Please log in first'}, 401
         
@@ -112,25 +123,6 @@ class CrudItems(Resource):
             item_image_url = request.json['item_image_url']
             item_category = request.json['item_category']
             items_in_stock = request.json['items_in_stock']
-            
-            categories = ['Smartphone', 'Laptop', 'Desktop', 'TV', 'Earbuds', 'Headphones', 'Sound system', 'Speakers', 'Smartwatch', 'Tablet']
-            
-            item_price = int(item_price)
-            items_in_stock = int(items_in_stock)
-            
-            if not item_name or not item_features or not item_price or not item_image_url or not item_category or not items_in_stock:
-                return make_response({"message": "All fields should be filled."}, 400)
-            
-            if item_price <= 0:
-                return make_response({"message": "Item price should be greater than 0."}, 400)
-            
-            if items_in_stock < 0:
-                return make_response({"message": "Items in stock cannot be a negative number"}, 400)
-            
-            item_category = item_category.strip().capitalize()
-            
-            if item_category not in categories:
-                return make_response({"message": f"Input category '{item_category}' is invalid. Allowed categories are: {', '.join(categories)}."}, 400)
 
             new_item = Item(
                 item_name=item_name,
@@ -166,9 +158,9 @@ api.add_resource(CrudItems, '/api/items', endpoint="crudItems")
 
 
 class CrudItemsById(Resource):
+    #Add constraints and validations to the fields when PATCHing new review, all the required fields should be filled and descriptive messages in case of errors
     def patch(self, item_id):
-        
-        # And has to have the user role of 'Admin'
+
         if 'user_id' not in session:
             return {'error': 'Unauthorized: Please log in first'}, 401
         
@@ -180,31 +172,13 @@ class CrudItemsById(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         
         if not item:
-            return make_response({"message": f"Item id {item_id} not found"}, 404)
+            response_dict = {"message": f"Item id {item_id} not found"}
+            return make_response(response_dict, 404)
         
-        changes_made = False
-        updated_category = None
-        
-        for attr, new_value in request.json.items():
+        for attr in request.json:
             if hasattr(item, attr):
-                if getattr(item, attr) != new_value:
-                    if attr == 'item_category':
-                        updated_category = new_value.strip().capitalize()
-                    else:
-                        setattr(item, attr, new_value)
-                    changes_made = True
-                    
-        if not changes_made:
-            return make_response({"message": "No changes made. The provided data is the same as the current."}, 400)
-        
-        if updated_category:
-            categories = ['Smartphone', 'Laptop', 'Desktop', 'TV', 'Earbuds', 'Headphones', 'Sound system', 'Speakers', 'Smartwatch', 'Tablet']
-            
-            if updated_category not in categories:
-                return make_response({"message": f"Input category '{updated_category}' is invalid. Allowed categories are: {', '.join(categories)}."}, 400)
-            
-            item.item_category = updated_category
-            
+                setattr(item, attr, request.json[attr])
+                
         db.session.add(item)
         db.session.commit()
         
@@ -213,8 +187,6 @@ class CrudItemsById(Resource):
         return make_response(jsonify(response_dict), 200)
     
     def delete(self, item_id):
-        
-        # And has to have the user role of 'Admin'
         if 'user_id' not in session:
             return {'error': 'Unauthorized: Please log in first'}, 401
         
@@ -423,5 +395,3 @@ def best_sellers_items():
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-    
-    
