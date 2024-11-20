@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template, make_response, session
-from models import db, User, Product, Cart, Review, Item, SpecialCategory
+from models import db, User, Cart, Review, Item, SpecialCategory
 from flask_migrate import Migrate
-from serializer import user_serializer, product_serializer
+from serializer import user_serializer, item_serializer
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import IntegrityError
 from flask_restful import Api, Resource
@@ -114,42 +114,54 @@ def delete_account():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Admin routes for managing products
-@app.route('/api/admin/products', methods=['POST'])
-@login_required
-@admin_required
-def add_product():
-    data = request.json
+# Admin routes for managing items
+# @app.route('/api/admin/items', methods=['POST'])
+# @login_required
+# @admin_required
+# def add_items():
+#     data = request.json
 
-    if 'name' not in data or 'price' not in data or 'user_id' not in data:
-        return jsonify({'error': 'Name, price, and user_id are required'}), 400
+#     if 'name' not in data or 'price' not in data or 'user_id' not in data:
+#         return jsonify({'error': 'Name, price, and user_id are required'}), 400
 
-    try:
-        user = User.query.get(data['user_id'])
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
+#     try:
+#         user = User.query.get(data['user_id'])
+#         if not user:
+#             return jsonify({'error': 'User not found'}), 404
 
-        new_product = Product(
-            name=data['name'],
-            description=data.get('description', ''),
-            price=data['price'],
-            item_availability=data.get('item_availability', 0),
-            user_id=data['user_id']
-        )
-        db.session.add(new_product)
-        db.session.commit()
+         
+#         item_name = request.json['item_name']
+#         item_features = request.json['item_features']
+#         item_price = request.json['item_price']
+#         item_image_url = request.json['item_image_url']
+#         item_category = request.json['item_category']
+#         items_in_stock = request.json['items_in_stock']
 
-        return jsonify(product_serializer(new_product)), 201
+#         new_item = Item(
+#                 item_name=item_name,
+#                 item_features=item_features,
+#                 item_price=item_price,
+#                 item_image_url=item_image_url,
+#                 item_category=item_category,
+#                 items_in_stock=items_in_stock
+#             )
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
 
-# Get all products
-@app.route('/api/products', methods=['GET'])
-def get_products():
-    products = Product.query.all()
-    return jsonify([product_serializer(product) for product in products]), 200
+        
+#         db.session.add(new_pro)
+#         db.session.commit()
+
+#         return jsonify(product_serializer(new_product)), 201
+
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'error': str(e)}), 500
+
+# # Get all products
+# @app.route('/api/products', methods=['GET'])
+# def get_products():
+#     products = Product.query.all()
+#     return jsonify([product_serializer(product) for product in products]), 200
 
 # Get user by ID
 @app.route('/api/users/<int:id>', methods=['GET'])
@@ -219,63 +231,63 @@ def view_cart():
 
     cart_data = []
     for item in cart_items:
-        print(f"Item: {item}, Product: {item.product}")  
+        print(f"Item: {item}, Item: {item.item}")  
         cart_data.append({
-            'product': product_serializer(item.product),
+            'item': item_serializer(item.item),
             'quantity': item.quantity
         })
 
     return jsonify({'cart': cart_data}), 200
 
 
-# Add product to cart
+# Add item to cart
 @app.route('/api/cart', methods=['POST'])
 @login_required
 def add_to_cart():
     data = request.json
-    product_id = data.get('product_id')
+    item_id = data.get('item_id')
     quantity = data.get('quantity', 1)
 
-    product = Product.query.get(product_id)
-    if not product:
-        return jsonify({'error': 'Product not found'}), 404
+    item = Item.query.get(item_id)
+    if not item:
+        return jsonify({'error': 'Item not found'}), 404
 
-    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    cart_item = Cart.query.filter_by(user_id=current_user.id, item_id=item_id).first()
 
     if cart_item:
         cart_item.quantity += quantity
     else:
-        cart_item = Cart(user_id=current_user.id, product_id=product_id, quantity=quantity)
+        cart_item = Cart(user_id=current_user.id, item_id=item_id, quantity=quantity)
         db.session.add(cart_item)
 
     db.session.commit()
-    return jsonify({'message': 'Product added to cart successfully'}), 201
+    return jsonify({'message': 'Item added to cart successfully'}), 201
 
-# Remove product from cart
-@app.route('/api/cart/<int:product_id>', methods=['DELETE'])
+# Remove item from cart
+@app.route('/api/cart/<int:item_id>', methods=['DELETE'])
 @login_required
-def remove_from_cart(product_id):
-    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+def remove_from_cart(item_id):
+    cart_item = Cart.query.filter_by(user_id=current_user.id, item_id=item_id).first()
     if not cart_item:
-        return jsonify({'error': 'Product not in cart'}), 404
+        return jsonify({'error': 'Item not in cart'}), 404
 
     db.session.delete(cart_item)
     db.session.commit()
-    return jsonify({'message': 'Product removed from cart'}), 204
+    return jsonify({'message': 'Item removed from cart'}), 204
 
 # Update cart quantity
-@app.route('/api/cart/<int:product_id>', methods=['PATCH'])
+@app.route('/api/cart/<int:item_id>', methods=['PATCH'])
 @login_required
-def update_cart_quantity(product_id):
+def update_cart_quantity(item_id):
     data = request.json
     quantity = data.get('quantity')
 
     if not quantity or quantity <= 0:
         return jsonify({'error': 'Invalid quantity'}), 400
 
-    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    cart_item = Cart.query.filter_by(user_id=current_user.id, item_id=item_id).first()
     if not cart_item:
-        return jsonify({'error': 'Product not in cart'}), 404
+        return jsonify({'error': 'Item not in cart'}), 404
 
     cart_item.quantity = quantity
     db.session.commit()

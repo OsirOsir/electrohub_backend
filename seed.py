@@ -1,10 +1,21 @@
-from models import db, Item, SpecialCategory, Review, User
+from models import db, Item, SpecialCategory, Review, User, Cart
 from app import app
 from datetime import datetime
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
+# Set up and seed the database
 with app.app_context():
-    
+    try:
+        
+        db.drop_all()  
+        db.create_all()  
+        # seed_data() 
+
+    except Exception as e:
+        print(f"An error occurred while setting up the database: {e}")
+        db.session.rollback()
+
     #Delete associated relationships before seeding
     db.session.execute(text("DELETE FROM item_special_categories"))
     db.session.commit()
@@ -23,22 +34,23 @@ with app.app_context():
     db.session.execute(text("ALTER SEQUENCE items_id_seq RESTART WITH 1;"))
     db.session.execute(text("ALTER SEQUENCE special_categories_id_seq RESTART WITH 1;"))
     db.session.commit()
-    
+
+
     print("Seeding users...")
-    
+        
     users = [
-        User(id=1, username= "User 1", role = 'Admin'),
-        User(id=2, username= "User 2"),
-        User(id=3, username= "User 3", role = 'Admin'),
-        User(id=4, username= "User 4"),
-        User(id=5, username= "User 5", role = 'Admin')
+        User(username="AdminUser", email="admin@example.com", _password_hash = "adminpassword", role="admin"),
+        User(username="RegularUser", email="user@example.com", _password_hash = "userpassword", role="user"),
+        User(username="RegularUser1", email="user1@example.com", _password_hash = "userpassword1", role="user"),
+        User(username="AdminUser2", email="admin2@example.com", _password_hash = "adminpassword", role="admin"),
+        User(username="RegularUser3", email="user3@example.com", _password_hash = "userpassword", role="user")
     ]
-    
+
     db.session.add_all(users)
     db.session.commit()
-    
+
     print("Users seeded successfully!")
-    
+          
     print("Seeding items...")
     
     items = [
@@ -124,6 +136,16 @@ with app.app_context():
     db.session.commit()
 
     print("Items seeded successfully!")
+
+    def add_cart_items_for_user(user, item):
+        """Add sample cart items for a user."""
+        cart_items = [
+            Cart(user_id=user.id, item_id=1, quantity=2),  
+            Cart(user_id=user.id, item_id=2, quantity=1)   
+        ]
+        db.session.add_all(cart_items)
+        return cart_items
+
     
     
     print("Seeding special categories...")
@@ -241,32 +263,32 @@ with app.app_context():
         Review(rating=4, review_message="This item exceeded my expectations!", item_id=23, user_id=3),
         Review(rating=2, review_message="Not impressed, could be better.", item_id=56, user_id=2),
         Review(rating=5, review_message="Absolutely love it! Highly recommend.", item_id=12, user_id=1),
-        Review(rating=3, review_message="Decent product, but not amazing.", item_id=45, user_id=4),
+        Review(rating=3, review_message="Decent item, but not amazing.", item_id=45, user_id=4),
         Review(rating=1, review_message="Very disappointed with this purchase.", item_id=72, user_id=5),
         Review(rating=4, review_message="Good value for the price.", item_id=34, user_id=3),
         Review(rating=5, review_message="Best item I've bought in a long time!", item_id=17, user_id=2),
         Review(rating=2, review_message="Not worth the money, unfortunately.", item_id=68, user_id=1),
-        Review(rating=3, review_message="Okay product, could use some improvement.", item_id=5, user_id=4),
+        Review(rating=3, review_message="Okay item, could use some improvement.", item_id=5, user_id=4),
         Review(rating=4, review_message="Satisfied with my purchase.", item_id=29, user_id=5),
-        Review(rating=1, review_message="Terrible product, do not buy!", item_id=76, user_id=3),
+        Review(rating=1, review_message="Terrible item, do not buy!", item_id=76, user_id=3),
         Review(rating=5, review_message="Amazing quality, highly recommend!", item_id=10, user_id=2),
         Review(rating=3, review_message="Mixed feelings about this item.", item_id=42, user_id=1),
         Review(rating=4, review_message="Good overall, but could be better.", item_id=61, user_id=4),
         Review(rating=5, review_message="Absolutely love it! Highly recommend.", item_id=1, user_id=3),
         Review(rating=5, review_message="Love it! Perfect for what I needed.", item_id=2, user_id=5),
         Review(rating=2, review_message="Disappointed with the performance.", item_id=58, user_id=3),
-        Review(rating=4, review_message="Solid product, would buy again.", item_id=15, user_id=2),
+        Review(rating=4, review_message="Solid item, would buy again.", item_id=15, user_id=2),
         Review(rating=1, review_message="Waste of money, do not recommend.", item_id=70, user_id=1),
-        Review(rating=3, review_message="Okay product, nothing special.", item_id=37, user_id=4),
+        Review(rating=3, review_message="Okay item, nothing special.", item_id=37, user_id=4),
         Review(rating=4, review_message="Happy with my purchase, good value.", item_id=8, user_id=5),
-        Review(rating=3, review_message="Decent product, could be better.", item_id=5, user_id=2),
+        Review(rating=3, review_message="Decent item, could be better.", item_id=5, user_id=2),
         Review(rating=5, review_message="Amazing quality, highly recommend!", item_id=10, user_id=3),
         Review(rating=1, review_message="Very disappointed with this purchase.", item_id=72, user_id=4),
         Review(rating=4, review_message="Good value for the price.", item_id=34, user_id=1),
         Review(rating=2, review_message="Not impressed, could be better.", item_id=56, user_id=5),
-        Review(rating=3, review_message="Okay product, could use some improvement.", item_id=5, user_id=3),
+        Review(rating=3, review_message="Okay item, could use some improvement.", item_id=5, user_id=3),
         Review(rating=4, review_message="Satisfied with my purchase.", item_id=29, user_id=2),
-        Review(rating=1, review_message="Terrible product, do not buy!", item_id=76, user_id=1),
+        Review(rating=1, review_message="Terrible item, do not buy!", item_id=76, user_id=1),
         Review(rating=5, review_message="Best item I've bought in a long time!", item_id=17, user_id=4),
         Review(rating=2, review_message="Not worth the money, unfortunately.", item_id=68, user_id=5),
         Review(rating=4, review_message="Good overall, but could be better.", item_id=61, user_id=3),
@@ -278,11 +300,11 @@ with app.app_context():
         Review(rating=4, review_message="This item exceeded my expectations!", item_id=23, user_id=3),
         Review(rating=1, review_message="Very disappointed with this purchase.", item_id=72, user_id=2),
         Review(rating=5, review_message="Amazing quality, highly recommend!", item_id=10, user_id=1),
-        Review(rating=3, review_message="Decent product, but not amazing.", item_id=45, user_id=4),
+        Review(rating=3, review_message="Decent item, but not amazing.", item_id=45, user_id=4),
         Review(rating=4, review_message="Good value for the price.", item_id=1, user_id=5),
         Review(rating=4, review_message="Good value for the price.", item_id=1, user_id=1),
         Review(rating=2, review_message="Not impressed, could be better.", item_id=1, user_id=5),
-        Review(rating=3, review_message="Okay product, could use some improvement.", item_id=5, user_id=3),
+        Review(rating=3, review_message="Okay item, could use some improvement.", item_id=5, user_id=3),
         Review(rating=4, review_message="Satisfied with my purchase.", item_id=29, user_id=2),
     ]
     
@@ -297,4 +319,102 @@ with app.app_context():
     
     
     
+
+
+
+
+
+
+
+
+
+#         def create_items(admin_user):
+# #     """Create electronics items associated with the admin user."""
+# #     items = [
+# #         item(
+# #             name="Laptop", 
+# #             description="A powerful laptop for professionals.", 
+# #             price=1099, 
+# #             item_availability=50, 
+# #             user_id=admin_user.id  
+# #         ),
+# #         item(
+# #             name="Smartphone", 
+# #             description="A high-end smartphone with all the latest features.", 
+# #             price=899, 
+# #             item_availability=100, 
+# #             user_id=admin_user.id
+# #         ),
+# #         item(
+# #             name="Headphones", 
+# #             description="Noise-canceling headphones for an immersive experience.", 
+# #             price=199, 
+# #             item_availability=75, 
+# #             user_id=admin_user.id
+# #         )
+# #     ]
+# #     return items
+
+
+# print("Seeding users...")
     
+#     # users = [
+#     #     User(id=1, username= "User 1", role = 'Admin'),
+#     #     User(id=2, username= "User 2"),
+#     #     User(id=3, username= "User 3", role = 'Admin'),
+#     #     User(id=4, username= "User 4"),
+#     #     User(id=5, username= "User 5", role = 'Admin')
+#     # ]
+    
+#     # db.session.add_all(users)
+#     # db.session.commit()
+    
+#     # print("Users seeded successfully!")
+
+# def create_users():
+#     """Create and return admin and regular users."""
+#     admin_user =   
+
+#     regular_user =   
+
+#     regular_user1 = 
+
+#     admin_user2 =   
+
+#     regular_user3 =  
+
+
+#     return admin_user, regular_user, regular_user1, admin_user2, regular_user3
+
+# def seed_data():
+#     """Seed the database with sample data."""
+#     try:
+        
+#         admin_user, regular_user, regular_user1 = create_users()
+#         db.session.add(admin_user)
+#         db.session.add_all([regular_user, regular_user1])
+
+        
+#         db.session.commit()
+
+#         print("seed data message")
+#         items = create_users(admin_user)
+#         db.session.add_all(items)
+#         db.session.commit()
+
+        
+#         add_cart_items_for_user(regular_user, items)  
+#         add_cart_items_for_user(regular_user1, items)  
+
+        
+#         db.session.commit()
+
+#         print("Database seeded successfully with Admin, and Users!")
+
+#     except IntegrityError as ie:
+#         print(f"Integrity error occurred: {ie}")
+#         db.session.rollback()  
+
+#     except Exception as e:
+#         print(f"An error occurred while seeding the database: {e}")
+#         db.session.rollback()
