@@ -137,15 +137,14 @@ with app.app_context():
 
     print("Items seeded successfully!")
 
-    def add_cart_items_for_user(user, item):
-        """Add sample cart items for a user."""
-        cart_items = [
-            Cart(user_id=user.id, item_id=1, quantity=2),  
-            Cart(user_id=user.id, item_id=2, quantity=1)   
-        ]
-        db.session.add_all(cart_items)
-        return cart_items
-
+    
+    cart_items = [
+        Cart(user_id=1, item_id=1, quantity=2),  
+        Cart(user_id=2, item_id=2, quantity=1)   
+    ]
+    db.session.add_all(cart_items)
+    db.session.commit()
+        
     
     
     print("Seeding special categories...")
@@ -418,3 +417,14 @@ with app.app_context():
 #     except Exception as e:
 #         print(f"An error occurred while seeding the database: {e}")
 #         db.session.rollback()
+
+
+# def add_cart_items_for_user(user, item):
+#         """Add sample cart items for a user."""
+#         cart_items = [
+#             Cart(user_id=user.id, item_id=1, quantity=2),  
+#             Cart(user_id=user.id, item_id=2, quantity=1)   
+#         ]
+#         db.session.add_all(cart_items)
+#         db.session.commit()
+#         return cart_items

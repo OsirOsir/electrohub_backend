@@ -51,7 +51,7 @@ class User(db.Model, UserMixin):
         return self.role == 'admin'
 
     def __repr__(self):
-        return f'<User(name={self.name}, role={self.role}, is_active={self.is_active})>'
+        return f'<User(name={self.username}, role={self.role}, is_active={self.is_active})>'
 
 item_special_categories = db.Table(
         'item_special_categories',
