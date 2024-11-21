@@ -86,7 +86,8 @@ def login():
 
     if user and user.is_active and user.authenticate(data.get('password')):
         login_user(user)
-        session['user_id']= user.id
+        
+        
         return jsonify({'message': 'Login successful', 'user': user_serializer(user)}), 200
     return jsonify({'error': 'Invalid email or password'}), 401
 
@@ -95,7 +96,6 @@ def login():
 @login_required
 def logout():
     logout_user()
-    session.pop('user_id', None)
 
     return jsonify({'message': 'Logout successful'}), 200
 
@@ -380,17 +380,17 @@ class CrudItems(Resource):
         response = make_response(items_list, 200,)
         return response
     
-    #Add 'Create Item button' in the frontend
-    #Create, Update, Delete only for Admin and when logged in
     def post(self):
-        #Add constraints and validations to the fields when POSTing new review, all the required fields should be filled and descriptive messages in case of errors
-        if 'user_id' not in session:
-            return {'error': 'Unauthorized: Please log in first'}, 401
         
-        user = User.query.filter_by(id=session['user_id']).first()
+        # print(session)
         
-        if not user or user.role != 'Admin':
-            return {'error': 'Forbidden: Only admins can perform this action'}, 403
+        # if 'user_id' not in session:
+        #     return {'error': 'Unauthorized: Please log in first'}, 401
+        
+        # user = User.query.filter_by(id=session['user_id']).first()
+        
+        # if not user or user.role != 'admin':
+        #     return {'error': 'Forbidden: Only admins can perform this action'}, 403
         
         try:
             item_name = request.json['item_name']
@@ -437,13 +437,13 @@ class CrudItemsById(Resource):
     #Add constraints and validations to the fields when PATCHing new review, all the required fields should be filled and descriptive messages in case of errors
     def patch(self, item_id):
 
-        if 'user_id' not in session:
-            return {'error': 'Unauthorized: Please log in first'}, 401
+        # if 'user_id' not in session:
+        #     return {'error': 'Unauthorized: Please log in first'}, 401
         
-        user = User.query.filter_by(id=session['user_id']).first()
+        # user = User.query.filter_by(id=session['user_id']).first()
         
-        if not user or user.role != 'Admin':
-            return {'error': 'Forbidden: Only admins can perform this action'}, 403
+        # if not user or user.role != 'admin':
+        #     return {'error': 'Forbidden: Only admins can perform this action'}, 403
         
         item = Item.query.filter(Item.id == item_id).first()
         
@@ -463,13 +463,14 @@ class CrudItemsById(Resource):
         return make_response(jsonify(response_dict), 200)
     
     def delete(self, item_id):
-        if 'user_id' not in session:
-            return {'error': 'Unauthorized: Please log in first'}, 401
         
-        user = User.query.filter_by(id=session['user_id']).first()
+        # if 'user_id' not in session:
+        #     return {'error': 'Unauthorized: Please log in first'}, 401
         
-        if not user or user.role != 'Admin':
-            return {'error': 'Forbidden: Only admins can perform this action'}, 403
+        # user = User.query.filter_by(id=session['user_id']).first()
+        
+        # if not user or user.role != 'admin':
+        #     return {'error': 'Forbidden: Only admins can perform this action'}, 403
         
         item = Item.query.filter(Item.id == item_id).first()
         
@@ -527,8 +528,8 @@ class ItemReviewsById(Resource):
 
     def post(self, item_id):
         
-        if 'user_id' not in session:
-            return {'error': 'Unauthorized'}, 401
+        # if 'user_id' not in session:
+        #     return {'error': 'Unauthorized'}, 401
         
         try:
             rating = request.json['rating']
@@ -564,8 +565,8 @@ class ModifyItemReviewById(Resource):
     def patch(self, review_id):
         
         # Also that the user.id matches the user.id of the owner of the review
-        if 'user_id' not in session:
-            return {'error': 'Unauthorized'}, 401
+        # if 'user_id' not in session:
+        #     return {'error': 'Unauthorized'}, 401
         
         review = Review.query.filter(Review.id == review_id).first()
         
@@ -588,8 +589,8 @@ class ModifyItemReviewById(Resource):
     def delete(self, review_id):
         
         # Also that the user.id matches the user.id of the owner of the review
-        if 'user_id' not in session:
-            return {'error': 'Unauthorized'}, 401
+        # if 'user_id' not in session:
+        #     return {'error': 'Unauthorized'}, 401
         
         review = Review.query.filter_by(id=review_id).first()
         
@@ -671,3 +672,6 @@ def best_sellers_items():
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+    
+    
+
