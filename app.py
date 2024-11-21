@@ -51,10 +51,10 @@ def handle_users():
 
     elif request.method == 'POST':
         data = request.json
-        required_fields = ['name', 'email', 'password']
+        required_fields = ['username', 'email', 'password']
 
         if not all(field in data for field in required_fields):
-            return jsonify({'error': 'Name, email, and password are required'}), 400
+            return jsonify({'error': 'User name, email, and password are required'}), 400
 
         # Check if user already exists
         if User.query.filter_by(email=data['email']).first():
@@ -63,13 +63,14 @@ def handle_users():
         try:
             role = data.get('role', 'user')
             new_user = User(
-                name=data['name'],
+                username=data['username'],
                 email=data['email'],
                 role=role
             )
             new_user.password = data['password']
             db.session.add(new_user)
             db.session.commit()
+            session['user_id']= new_user.id
 
             return jsonify(user_serializer(new_user)), 201
 
@@ -85,6 +86,7 @@ def login():
 
     if user and user.is_active and user.authenticate(data.get('password')):
         login_user(user)
+        session['user_id']= user.id
         return jsonify({'message': 'Login successful', 'user': user_serializer(user)}), 200
     return jsonify({'error': 'Invalid email or password'}), 401
 
@@ -93,6 +95,8 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.pop('user_id', None)
+
     return jsonify({'message': 'Logout successful'}), 200
 
 # User profile
@@ -294,7 +298,6 @@ def update_cart_quantity(item_id):
     return jsonify({'message': 'Cart updated successfully'}), 200
 
 
-    app.run(debug=True, port=5555)
 
 @app.route("/api/item/<int:item_id>/add_special_category", methods=["POST"])
 def add_special_category_to_item(item_id):

@@ -20,7 +20,7 @@ bcrypt = Bcrypt()
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
-    serialize_rules = ('-reviews.user',)
+    serialize_rules = ('-reviews.user', '-cart_items.user',)
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
@@ -61,8 +61,7 @@ item_special_categories = db.Table(
 
 class Item(db.Model, SerializerMixin):
     __tablename__ = 'items'
-    
-    serialize_rules = ('-reviews.item', '-reviews.user',)
+    serialize_rules = ('-reviews.item', '-reviews.user', '-cart_items.item',)
     
     id = db.Column(db.Integer, primary_key=True)
 
@@ -129,6 +128,7 @@ class Review(db.Model, SerializerMixin):
 # Cart Model
 class Cart(db.Model, SerializerMixin):
     __tablename__ = 'carts'
+    serialize_rules = ('-user.cart_items', '-item.cart_items')
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
