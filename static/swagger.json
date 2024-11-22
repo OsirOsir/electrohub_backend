@@ -11,12 +11,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5555",
-      "description": "Local Development Server"
-    },
-    {
       "url": "https://electrohub-backend.onrender.com",
       "description": "Production Server"
+    },
+    {
+      "url": "http://localhost:5555",
+      "description": "Local Development Server"
     }
   ],
   "paths": {
