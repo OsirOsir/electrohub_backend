@@ -220,6 +220,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "No users found"
           }
         }
       },
@@ -257,8 +260,8 @@
     "/api/users/{user_id}": {
       "get": {
         "tags": ["Users"],
-        "summary": "Get a specific user by ID",
-        "operationId": "getUserById",
+        "summary": "Get user information",
+        "operationId": "getUser",
         "parameters": [
           {
             "name": "user_id",
@@ -271,7 +274,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User retrieved successfully",
+            "description": "User information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -284,16 +287,59 @@
             "description": "User not found"
           }
         }
-      }
-    },
-    "/api/item-special-categories": {
-      "get": {
-        "tags": ["ItemSpecialCategory"],
-        "summary": "Get all item-special category associations",
-        "operationId": "getItemSpecialCategories",
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user information",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "List of item-special category associations",
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/item_special_categories": {
+      "get": {
+        "tags": ["ItemSpecialCategory"],
+        "summary": "Get all item-special category relationships",
+        "operationId": "getAllItemSpecialCategories",
+        "responses": {
+          "200": {
+            "description": "List of item-special category relationships",
             "content": {
               "application/json": {
                 "schema": {
@@ -304,12 +350,15 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "No item-special category relationships found"
           }
         }
       },
       "post": {
         "tags": ["ItemSpecialCategory"],
-        "summary": "Create a new item-special category association",
+        "summary": "Create a new item-special category relationship",
         "operationId": "createItemSpecialCategory",
         "requestBody": {
           "required": true,
@@ -323,7 +372,7 @@
         },
         "responses": {
           "201": {
-            "description": "Item-special category association created successfully",
+            "description": "Item-special category relationship created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -338,41 +387,57 @@
         }
       }
     },
-    "/api/carts": {
+    "/api/reviews": {
       "get": {
-        "tags": ["Carts"],
-        "summary": "Get the cart for the current user",
-        "operationId": "getCart",
+        "tags": ["Review"],
+        "summary": "Get all reviews",
+        "operationId": "getAllReviews",
         "responses": {
           "200": {
-            "description": "Cart retrieved successfully",
+            "description": "List of all reviews",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  }
                 }
               }
             }
           },
           "404": {
-            "description": "Cart not found"
+            "description": "No reviews found"
           }
         }
       },
       "post": {
-        "tags": ["Carts"],
-        "summary": "Create a cart for the current user",
-        "operationId": "createCart",
+        "tags": ["Review"],
+        "summary": "Create a new review",
+        "operationId": "createReview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": "Cart created successfully",
+            "description": "Review created successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "$ref": "#/components/schemas/Review"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
           }
         }
       }
@@ -380,37 +445,49 @@
   },
   "components": {
     "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "user_id": {
-            "type": "integer"
-          },
-          "username": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          }
-        }
-      },
       "Item": {
         "type": "object",
         "properties": {
-          "item_id": {
+          "id": {
             "type": "integer"
           },
           "name": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           },
           "price": {
             "type": "number",
             "format": "float"
           },
-          "special_category": {
+          "quantity": {
+            "type": "integer"
+          },
+          "category": {
+            "type": "string"
+          },
+          "special_categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
             "type": "string"
           }
         }
@@ -421,29 +498,27 @@
           "item_id": {
             "type": "integer"
           },
-          "special_category": {
-            "type": "string"
+          "special_category_id": {
+            "type": "integer"
           }
         }
       },
-      "Cart": {
+      "Review": {
         "type": "object",
         "properties": {
-          "cart_id": {
+          "item_id": {
             "type": "integer"
           },
           "user_id": {
             "type": "integer"
           },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Item"
-            }
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
           },
-          "total_price": {
-            "type": "number",
-            "format": "float"
+          "comment": {
+            "type": "string"
           }
         }
       }
