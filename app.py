@@ -135,55 +135,6 @@ def delete_account():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# Admin routes for managing items
-# @app.route('/api/admin/items', methods=['POST'])
-# @login_required
-# @admin_required
-# def add_items():
-#     data = request.json
-
-#     if 'name' not in data or 'price' not in data or 'user_id' not in data:
-#         return jsonify({'error': 'Name, price, and user_id are required'}), 400
-
-#     try:
-#         user = User.query.get(data['user_id'])
-#         if not user:
-#             return jsonify({'error': 'User not found'}), 404
-
-         
-#         item_name = request.json['item_name']
-#         item_features = request.json['item_features']
-#         item_price = request.json['item_price']
-#         item_image_url = request.json['item_image_url']
-#         item_category = request.json['item_category']
-#         items_in_stock = request.json['items_in_stock']
-
-#         new_item = Item(
-#                 item_name=item_name,
-#                 item_features=item_features,
-#                 item_price=item_price,
-#                 item_image_url=item_image_url,
-#                 item_category=item_category,
-#                 items_in_stock=items_in_stock
-#             )
-
-
-        
-#         db.session.add(new_pro)
-#         db.session.commit()
-
-#         return jsonify(product_serializer(new_product)), 201
-
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'error': str(e)}), 500
-
-# # Get all products
-# @app.route('/api/products', methods=['GET'])
-# def get_products():
-#     products = Product.query.all()
-#     return jsonify([product_serializer(product) for product in products]), 200
-
 # Get user by ID
 @app.route('/api/users/<int:id>', methods=['GET'])
 @login_required
