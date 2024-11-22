@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "description": "ElectroHub site",
+    "description": "ElectroHub API",
     "version": "1.0.0",
     "title": "ElectroHub",
     "license": {
