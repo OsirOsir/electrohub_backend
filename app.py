@@ -1,4 +1,5 @@
 import os
+from flask_swagger_ui import get_swaggerui_blueprint
 from flask import Flask, jsonify, request, render_template, make_response, session
 from models import db, User, Cart, Review, Item, SpecialCategory
 from flask_migrate import Migrate
@@ -15,6 +16,21 @@ app = Flask(__name__, static_folder='static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://groupthree:sfb31oTxBAToN04gFlsyk6X2ERbCp2oD@dpg-csvggau8ii6s73esk4ng-a.oregon-postgres.render.com/electrohub_db_5djp'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'supersecretkey'
+
+#
+SWAGGER_URL = '/swagger'  # URL for exposing Swagger UI (without trailing '/')
+API_URL = '/static/swagger.json'  # Our API url (can of course be a local resource)
+
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    API_URL,
+    config={  # Swagger UI config overrides
+        'app_name': "electrohub_api"
+    },
+   
+)
+
+app.register_blueprint(swaggerui_blueprint, url_prefix = SWAGGER_URL)
 
 # Initialize extensions
 db.init_app(app)

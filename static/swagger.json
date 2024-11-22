@@ -1,0 +1,527 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "ElectroHub site",
+    "version": "1.0.0",
+    "title": "ElectroHub",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5555",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://electrohub-backend.onrender.com",
+      "description": "Production Server"
+    }
+  ],
+  "paths": {
+    "/api/items": {
+      "get": {
+        "tags": ["Items"],
+        "summary": "Get all items",
+        "operationId": "getAllItems",
+        "responses": {
+          "200": {
+            "description": "List of all items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No items found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Items"],
+        "summary": "Create a new item",
+        "operationId": "createItem",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          },
+          "401": {
+            "description": "Unauthorized, please log in first"
+          },
+          "403": {
+            "description": "Forbidden, only admins can perform this action"
+          }
+        }
+      }
+    },
+    "/api/items/{item_id}": {
+      "get": {
+        "tags": ["Items"],
+        "summary": "Get a specific item by ID",
+        "operationId": "getItem",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Items"],
+        "summary": "Update an existing item",
+        "operationId": "updateItem",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          },
+          "401": {
+            "description": "Unauthorized, please log in first"
+          },
+          "403": {
+            "description": "Forbidden, only admins can perform this action"
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Items"],
+        "summary": "Delete an existing item",
+        "operationId": "deleteItem",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, please log in first"
+          },
+          "403": {
+            "description": "Forbidden, only admins can perform this action"
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "List of all users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No users found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user",
+        "operationId": "createUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          }
+        }
+      }
+    },
+    "/api/users/{user_id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user information",
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user information",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/item_special_categories": {
+      "get": {
+        "tags": ["ItemSpecialCategory"],
+        "summary": "Get all item-special category relationships",
+        "operationId": "getAllItemSpecialCategories",
+        "responses": {
+          "200": {
+            "description": "List of item-special category relationships",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemSpecialCategory"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No item-special category relationships found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["ItemSpecialCategory"],
+        "summary": "Create a new item-special category relationship",
+        "operationId": "createItemSpecialCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemSpecialCategory"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item-special category relationship created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemSpecialCategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "get": {
+        "tags": ["Review"],
+        "summary": "Get all reviews",
+        "operationId": "getAllReviews",
+        "responses": {
+          "200": {
+            "description": "List of all reviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No reviews found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Review"],
+        "summary": "Create a new review",
+        "operationId": "createReview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, missing required fields"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "float"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "category": {
+            "type": "string"
+          },
+          "special_categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "ItemSpecialCategory": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "integer"
+          },
+          "special_category_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
