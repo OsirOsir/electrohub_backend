@@ -2,12 +2,12 @@
 
 ElectroHub is an e-commerce application for browsing and purchasing electronic products. This repository contains the **Python/Flask backend**, including application logic, database management, authentication, product management, cart functionality, and checkout workflows.
 
-The application supports a range of electronics, including smartphones, laptops, desktops, TVs, headphones, speakers, smartwatches, tablets, and related accessories.
+The application supports electronics such as smartphones, laptops, desktops, TVs, headphones, speakers, smartwatches, tablets, and related accessories.
 
 ## Features
 
 - User registration, login, and logout
-- Product catalog and product-detail functionality
+- Product catalog and product details
 - Product search and filtering
 - Shopping cart management
 - Checkout workflow
@@ -19,18 +19,18 @@ The application supports a range of electronics, including smartphones, laptops,
 
 ## Tech Stack
 
-**Backend**
+### Backend
 - Python
 - Flask
 
-**Database**
+### Database
 - PostgreSQL
 - SQLAlchemy
 
-**Database Migrations**
+### Database Migrations
 - Flask-Migrate / Alembic
 
-**Frontend**
+### Frontend
 - React
 - JavaScript
 - Bootstrap / CSS
@@ -46,7 +46,7 @@ The frontend is maintained separately:
 ```bash
 git clone https://github.com/OsirOsir/electrohub_backend.git
 cd electrohub_backend
-````
+```
 
 ### 2. Create and activate the virtual environment
 
@@ -84,7 +84,7 @@ FLASK_RUN_PORT=5555
 DATABASE_URL=postgresql://username:password@localhost/electrohub_db
 ```
 
-Do not commit your actual database credentials or secrets to GitHub.
+Do not commit actual passwords, API keys, database credentials, or other secrets to GitHub.
 
 ### 4. Set up the PostgreSQL database
 
@@ -96,7 +96,7 @@ If migrations are already included in the repository, run:
 flask db upgrade
 ```
 
-If you are creating new migrations during development:
+When creating new migrations during development:
 
 ```bash
 flask db migrate -m "migration description"
@@ -129,7 +129,7 @@ Users can browse available electronic products, search the catalog, filter produ
 
 ### Authentication
 
-Users can create accounts, log in, log out, and access functionality associated with authenticated users.
+Users can create accounts, log in, log out, and access functionality available to authenticated users.
 
 ### Shopping Cart
 
@@ -147,22 +147,22 @@ Administrative functionality supports management of products and orders.
 
 ElectroHub was developed to demonstrate the design and implementation of a full-stack e-commerce application using a Flask backend, PostgreSQL database, and React frontend.
 
-The project demonstrates practical experience with:
+The project demonstrates experience with:
 
-* Backend application development
-* Relational database design
-* ORM-based data management
-* API integration
-* User authentication
-* E-commerce workflows
-* Frontend/backend integration
-* Version control with Git and GitHub
+- Backend application development
+- Relational database design
+- ORM-based data management
+- API integration
+- User authentication
+- E-commerce workflows
+- Frontend/backend integration
+- Version control with Git and GitHub
 
 ## Frontend Repository
 
 The client-side application is available here:
 
-[https://github.com/OsirOsir/electrohub-frontend](https://github.com/OsirOsir/electrohub-frontend)
+[ElectroHub Frontend](https://github.com/OsirOsir/electrohub-frontend)
 
 ## Contributing
 
@@ -192,4 +192,3 @@ git push origin feature/your-feature
 ## License
 
 This project is intended for educational and portfolio purposes.
-
