@@ -1,6 +1,3 @@
-Paste this into the `README.md` for `electrohub_backend`:
-
-````markdown
 # ElectroHub Backend
 
 ElectroHub is an e-commerce application for browsing and purchasing electronic products. This repository contains the **Python/Flask backend**, including application logic, database management, authentication, product management, cart functionality, and checkout workflows.
@@ -196,11 +193,3 @@ git push origin feature/your-feature
 
 This project is intended for educational and portfolio purposes.
 
-```
-
-And for the GitHub **About** description, paste this:
-
-> **Flask and PostgreSQL backend for ElectroHub, a full-stack e-commerce application with authentication, product management, cart, checkout, and REST API integration.**
-
-One more thing: before saving, make sure the repo does **not** contain a real `.env`, database password, API key, or token.
-```
